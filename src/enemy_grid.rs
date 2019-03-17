@@ -5,6 +5,7 @@ use crate::common::Point;
 
 const STEP_COUNTER: f32 = 10.0;
 const STEP_AMOUNT: f32 = 16.0;
+const LEVEL_INC: f32 = 2.0;
 
 pub struct EnemyGrid {
     w: f32,
@@ -21,6 +22,7 @@ pub struct EnemyGrid {
     step_direction: f32,
     moving_down: bool,
     step_amount: f32,
+    level: f32,
 }
 
 impl EnemyGrid {
@@ -53,6 +55,7 @@ impl EnemyGrid {
             moving_down: false,
             step_direction: -1.0,
             step_amount,
+            level: 0.0,
         }
     }
 
@@ -65,11 +68,25 @@ impl EnemyGrid {
         }
     }
 
+    pub fn has_won(&mut self) -> bool {
+        self.enemies.len() == 0
+    }
+
+    pub fn reset(&mut self) {
+        Self::generate_enemies(self.max_width, self.max_height, self.enemy_size, &mut self.enemies);
+        self.level += 1.0;
+        self.step_amount = (16.0 / STEP_COUNTER) + self.level * LEVEL_INC;
+        self.position = Point::new(0.0, 0.0);
+        self.step_direction = -1.0;
+        self.moving_down = false;
+    }
+    
     pub fn update(&mut self) {
         let remaining_enemies = self.enemies.len() as f32;
 
         self.step_amount = 16.0 / STEP_COUNTER;
-        self.step_amount = self.step_amount * (self.max_enemies / remaining_enemies);
+        self.step_amount = self.step_amount * (self.max_enemies / (remaining_enemies + 4.0));
+        self.step_amount += self.level * LEVEL_INC;
         
         let motion = match (self.moving_down, self.at_side()) {
             (false, true) => {

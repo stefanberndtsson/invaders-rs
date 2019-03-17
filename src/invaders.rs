@@ -29,6 +29,9 @@ impl EventHandler for Invaders {
         self.enemy_grid.update();
         self.player.update();
         self.player.check_hits(&mut self.enemy_grid);
+        if self.enemy_grid.has_won() {
+            self.enemy_grid.reset();
+        }
         Ok(())
     }
 
