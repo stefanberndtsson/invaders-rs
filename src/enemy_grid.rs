@@ -3,20 +3,23 @@ use ggez::graphics::{MeshBuilder};
 use crate::enemy::Enemy;
 use crate::common::Point;
 
-const STEP_COUNTER: u32 = 10;
+const STEP_COUNTER: f32 = 10.0;
+const STEP_AMOUNT: f32 = 16.0;
 
 pub struct EnemyGrid {
     w: f32,
     h: f32,
     pub enemies: Vec<Enemy>,
+    max_enemies: f32,
     max_width: i32,
     max_height: i32,
     enemy_size: Point,
     pub position: Point,
     leftmost_column: i32,
     rightmost_column: i32,
-    step_counter: u32,
+    step_counter: f32,
     step_direction: f32,
+    moving_down: bool,
     step_amount: f32,
 }
 
@@ -31,14 +34,15 @@ impl EnemyGrid {
         let leftmost_column = 0;
         let rightmost_column = max_width - 1;
 
+        let max_enemies = (max_width * max_height) as f32;
         let step_counter = STEP_COUNTER;
-        let step_direction = 1.0;
-        let step_amount = 16.0;
+        let step_amount = 16.0 / STEP_COUNTER;
         
         EnemyGrid {
             w,
             h,
             enemies,
+            max_enemies,
             max_width,
             max_height,
             enemy_size,
@@ -46,7 +50,8 @@ impl EnemyGrid {
             leftmost_column,
             rightmost_column,
             step_counter,
-            step_direction,
+            moving_down: false,
+            step_direction: -1.0,
             step_amount,
         }
     }
@@ -54,43 +59,45 @@ impl EnemyGrid {
     fn generate_enemies(width: i32, height: i32, size: Point, vec: &mut Vec<Enemy>) {
         for y in 0..height {
             for x in 0..width {
-                vec.push(Enemy::new(x as f32*size.x, y as f32*size.y, size.x, size.y));
+                let pos = Point::new(x as f32 * size.x, y as f32 * size.y);
+                vec.push(Enemy::new(pos));
             }
         }
     }
 
     pub fn update(&mut self) {
-        if self.step_counter > 0 {
-            self.step_counter -= 1;
-        } else {
-            if self.at_side() {
-                self.position = self.position + Point::new(0.0, self.step_amount);
+        let remaining_enemies = self.enemies.len() as f32;
+
+        self.step_amount = 16.0 / STEP_COUNTER;
+        self.step_amount = self.step_amount * (self.max_enemies / remaining_enemies);
+        
+        let motion = match (self.moving_down, self.at_side()) {
+            (false, true) => {
                 self.step_direction = -self.step_direction;
-            } else {
-                self.position = self.position + Point::new(self.step_direction * self.step_amount, 0.0);
+                self.moving_down = true;
+                Point::new(0.0, 4.0)
+            },
+            _ => {
+                self.moving_down = false;
+                Point::new(self.step_amount * self.step_direction, 0.0)
             }
-            self.step_counter = STEP_COUNTER;
+        };
+
+        for enemy in &mut self.enemies {
+            enemy.update(motion);
         }
     }
 
     fn at_side(&self) -> bool {
-        if self.step_direction > 0.0 &&
-            self.position.x >= self.w - (self.max_width as f32 * self.enemy_size.x) {
-                return true;
-            }
-        if self.step_direction < 0.0 &&
-            self.position.x <= 0.0 {
-                return true;
-            }
+        for enemy in &self.enemies {
+            if enemy.at_side(0.0, self.w) { return true }
+        }
         false
     }
     
     pub fn draw(&mut self, ctx: &mut Context, mb: &mut MeshBuilder) {
         for enemy in &mut self.enemies {
-            let relative_position = Point::new(enemy.x, enemy.y);
-            let enemy_position = self.position + relative_position;
-            enemy.draw(ctx, enemy_position, self.enemy_size, mb);
+            enemy.draw(ctx, mb);
         }
-        
     }
 }
