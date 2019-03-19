@@ -1,9 +1,9 @@
 use ggez::event::{EventHandler,MouseButton,KeyCode,KeyMods};
 use ggez::{Context,GameResult,timer};
 use ggez::graphics::{MeshBuilder,Color,DrawParam,clear,present,draw};
-use ggez::graphics;
 use crate::enemy_grid::EnemyGrid;
 use crate::player::Player;
+use crate::background::Background;
 
 pub struct Invaders {
     w: f32,
@@ -11,21 +11,24 @@ pub struct Invaders {
     score: u32,
     enemy_grid: EnemyGrid,
     player: Player,
+    background: Background,
 }
 
 impl Invaders {
-    pub fn new(w: f32, h: f32) -> Self {
+    pub fn new(w: f32, h: f32, ctx: &mut Context) -> Self {
         Invaders {
             w, h,
             score: 0,
             enemy_grid: EnemyGrid::new(w, h, 13, 3),
             player: Player::new(w, h),
+            background: Background::new(ctx),
         }
     }
 }
 
 impl EventHandler for Invaders {
     fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
+        self.background.update();
         self.enemy_grid.update();
         self.player.update();
         self.player.check_hits(&mut self.enemy_grid);
@@ -37,7 +40,9 @@ impl EventHandler for Invaders {
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         clear(ctx, Color::new(0.0,0.0,0.0,1.0));
-
+        let canvas = self.background.draw(ctx);
+        draw(ctx, &*canvas, DrawParam::default())?;
+        
         let mut mb = MeshBuilder::new();
         
         self.enemy_grid.draw(ctx, &mut mb);

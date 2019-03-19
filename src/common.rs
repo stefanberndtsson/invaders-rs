@@ -1,4 +1,10 @@
-use std::ops::Add;
+use std::ops::{Add,AddAssign};
+use rand::random;
+
+pub fn randrange(start: f32, stop: f32) -> f32 {
+    let random = random::<f32>();
+    (random * (stop-start))+start
+}
 
 #[derive(Copy,Clone,Debug)]
 pub struct Point {

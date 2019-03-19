@@ -1,4 +1,5 @@
 mod invaders;
+mod background;
 mod player;
 mod enemy;
 mod enemy_grid;
@@ -22,6 +23,6 @@ fn main() -> ggez::GameResult<()> {
         );
     let (ctx, events_loop) = &mut cb.build()?;
 
-    let state = &mut Invaders::new(SCRWIDTH as f32, SCRHEIGHT as f32);
+    let state = &mut Invaders::new(SCRWIDTH as f32, SCRHEIGHT as f32, ctx);
     event::run(ctx, events_loop, state)
 }

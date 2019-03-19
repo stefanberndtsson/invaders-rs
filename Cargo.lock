@@ -737,6 +737,7 @@ name = "invaders"
 version = "0.1.0"
 dependencies = [
  "ggez 0.5.0-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand 0.6.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
