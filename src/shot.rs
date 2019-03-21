@@ -15,14 +15,24 @@ pub struct Shot {
     pub s: f32,
 }
 
+pub enum ShotStatus {
+    Alive,
+    Offscreen,
+}
+
 impl Shot {
     pub fn new(x: f32, y: f32) -> Self {
         Shot { x, y, w: SHOTWIDTH, h: SHOTHEIGHT, s: SHOTSPEED }
     }
 
-    pub fn update(&mut self) {
+    pub fn update(&mut self) -> ShotStatus {
         if self.y > -self.h {
             self.y -= self.s;
+        }
+        if self.y < -SHOTHEIGHT {
+            ShotStatus::Offscreen
+        } else {
+            ShotStatus::Alive
         }
     }
     

@@ -1,8 +1,8 @@
-//use std::collections::BTreeSet;
+use std::collections::BTreeSet;
 use ggez::{Context};
 use ggez::graphics::{MeshBuilder,DrawMode,Color,Image,draw};
 use ggez::nalgebra::Point2;
-use crate::shot::Shot;
+use crate::shot::{Shot,ShotStatus};
 use crate::enemy::Enemy;
 use crate::enemy_grid::EnemyGrid;
 use crate::common::Point;
@@ -61,14 +61,14 @@ impl Player {
     }
     
     pub fn check_hits(&mut self, enemy_grid: &mut EnemyGrid) {
-        let mut enemies_to_remove = Vec::new();
-        let mut shots_to_remove = Vec::new();
+        let mut enemies_to_remove = BTreeSet::new();
+        let mut shots_to_remove = BTreeSet::new();
         
         for (i, enemy) in enemy_grid.enemies.iter().enumerate() {
             for (j, shot) in self.shots.iter().enumerate() {
                 if enemy.is_hit(shot, enemy_grid.position) {
-                    enemies_to_remove.push(i);
-                    shots_to_remove.push(j);
+                    enemies_to_remove.insert(i);
+                    shots_to_remove.insert(j);
                 }
             }
         }
@@ -93,8 +93,17 @@ impl Player {
         if self.cooldown > 0 {
             self.cooldown -= 1;
         }
-        for shot in &mut self.shots {
-            shot.update();
+
+        let mut shots_to_remove = BTreeSet::new();
+
+        for (i, shot) in (&mut self.shots).iter_mut().enumerate() {
+            match shot.update() {
+                ShotStatus::Offscreen => { shots_to_remove.insert(i); },
+                _ => ()
+            }
+        }
+        for i in shots_to_remove.iter().rev() {
+            self.shots.remove(*i);
         }
     }
 }
