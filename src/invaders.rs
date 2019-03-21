@@ -20,7 +20,7 @@ impl Invaders {
             w, h,
             score: 0,
             enemy_grid: EnemyGrid::new(w, h, 13, 3),
-            player: Player::new(w, h),
+            player: Player::new(w, h, ctx),
             background: Background::new(ctx),
         }
     }
@@ -46,11 +46,12 @@ impl EventHandler for Invaders {
         let mut mb = MeshBuilder::new();
         
         self.enemy_grid.draw(ctx, &mut mb);
-        self.player.draw(ctx, &mut mb);
+        self.player.draw_shots(ctx, &mut mb);
 
         let mesh = mb.build(ctx)?;
         
         draw(ctx, &mesh, DrawParam::default())?;
+        self.player.draw(ctx, &mut mb);
         
         present(ctx)?;
         Ok(())

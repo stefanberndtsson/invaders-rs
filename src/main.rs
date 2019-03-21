@@ -8,7 +8,7 @@ mod common;
 
 // export WINIT_HIDPI_FACTOR=1
 
-use ggez::conf::{WindowMode,FullscreenType};
+use ggez::conf::{WindowMode,FullscreenType,WindowSetup};
 use ggez::event;
 use invaders::Invaders;
 
@@ -17,6 +17,8 @@ const SCRHEIGHT: u32 = 1080;
 
 fn main() -> ggez::GameResult<()> {
     let cb = ggez::ContextBuilder::new("fire", "ggez")
+        .add_resource_path("resources")
+        .window_setup(WindowSetup::default().vsync(true))
         .window_mode(WindowMode::default()
                      .fullscreen_type(FullscreenType::Desktop)
                      .dimensions(SCRWIDTH as f32, SCRHEIGHT as f32)
