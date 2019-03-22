@@ -65,3 +65,11 @@ impl Area {
             }
     }
 }
+
+impl Add<Point> for Area {
+    type Output = Area;
+
+    fn add(self, point: Point) -> Area {
+        Area::new(self.x+point.x, self.y+point.y, self.w, self.h)
+    }
+}

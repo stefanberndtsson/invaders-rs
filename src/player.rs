@@ -16,7 +16,7 @@ pub struct Player {
     x: f32,
     cooldown: i32,
     motion: f32,
-    shots: Vec<Shot>,
+    pub shots: Vec<Shot>,
     image: Image,
 }
 

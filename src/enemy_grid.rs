@@ -26,10 +26,10 @@ pub struct EnemyGrid {
 }
 
 impl EnemyGrid {
-    pub fn new(w: f32, h: f32, max_width: i32, max_height: i32) -> Self {
+    pub fn new(w: f32, h: f32, max_width: i32, max_height: i32, ctx: &mut Context) -> Self {
         let mut enemies = Vec::new();
         let enemy_size = Point::new(64.0, 64.0);
-        Self::generate_enemies(max_width, max_height, enemy_size, &mut enemies);
+        Self::generate_enemies(max_width, max_height, enemy_size, &mut enemies, ctx);
         
         let position = Point::new(0.0, 0.0);
 
@@ -59,11 +59,11 @@ impl EnemyGrid {
         }
     }
 
-    fn generate_enemies(width: i32, height: i32, size: Point, vec: &mut Vec<Enemy>) {
+    fn generate_enemies(width: i32, height: i32, size: Point, vec: &mut Vec<Enemy>, ctx: &mut Context) {
         for y in 0..height {
             for x in 0..width {
                 let pos = Point::new(x as f32 * size.x, y as f32 * size.y);
-                vec.push(Enemy::new(pos));
+                vec.push(Enemy::new(pos, ctx));
             }
         }
     }
@@ -72,8 +72,8 @@ impl EnemyGrid {
         self.enemies.len() == 0
     }
 
-    pub fn reset(&mut self) {
-        Self::generate_enemies(self.max_width, self.max_height, self.enemy_size, &mut self.enemies);
+    pub fn reset(&mut self, ctx: &mut Context) {
+        Self::generate_enemies(self.max_width, self.max_height, self.enemy_size, &mut self.enemies, ctx);
         self.level += 1.0;
         self.step_amount = (16.0 / STEP_COUNTER) + self.level * LEVEL_INC;
         self.position = Point::new(0.0, 0.0);

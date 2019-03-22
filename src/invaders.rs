@@ -19,7 +19,7 @@ impl Invaders {
         Invaders {
             w, h,
             score: 0,
-            enemy_grid: EnemyGrid::new(w, h, 13, 3),
+            enemy_grid: EnemyGrid::new(w, h, 13, 3, ctx),
             player: Player::new(w, h, ctx),
             background: Background::new(ctx),
         }
@@ -27,13 +27,13 @@ impl Invaders {
 }
 
 impl EventHandler for Invaders {
-    fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
+    fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
         self.background.update();
         self.enemy_grid.update();
         self.player.update();
         self.player.check_hits(&mut self.enemy_grid);
         if self.enemy_grid.has_won() {
-            self.enemy_grid.reset();
+            self.enemy_grid.reset(ctx);
         }
         Ok(())
     }
@@ -44,14 +44,14 @@ impl EventHandler for Invaders {
         draw(ctx, &*canvas, DrawParam::default())?;
         
         let mut mb = MeshBuilder::new();
+        if self.player.shots.len() > 0 {
+            self.player.draw_shots(ctx, &mut mb);
+            let mesh = mb.build(ctx)?;
+            draw(ctx, &mesh, DrawParam::default())?;
+        }
         
-        self.enemy_grid.draw(ctx, &mut mb);
-        self.player.draw_shots(ctx, &mut mb);
-
-        let mesh = mb.build(ctx)?;
-        
-        draw(ctx, &mesh, DrawParam::default())?;
         self.player.draw(ctx, &mut mb);
+        self.enemy_grid.draw(ctx, &mut mb);
         
         present(ctx)?;
         Ok(())
